@@ -4,7 +4,7 @@ const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
 const port = 3001;
-const users = [];
+let users = [];
 
 app.get("/", (req, res) => {
   res.send("Hello there");
@@ -22,10 +22,12 @@ io.on("connection", (socket) => {
   console.log("Someone just connected");
   socket.on("join-room", ({ user, roomId }) => {
     console.log(user, " joined room ", roomId);
-    socket.join(roomId);
-    addUser(user, roomId);
-    socket.to(roomId).emit("connected", user);
-    io.to(roomId).emit("room-users", getRoomUsers(roomId));
+    if (roomId && user) {
+      socket.join(roomId);
+      addUser(user, roomId);
+      socket.to(roomId).emit("connected", user);
+      io.to(roomId).emit("room-users", getRoomUsers(roomId));
+    }
 
     socket.on("disconnect", () => {
       console.log("disconnected");
